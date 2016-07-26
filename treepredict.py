@@ -45,7 +45,7 @@ def divideset(rows,column,value) :
 
 
 # Create counts of possibe results (the last column of each row is the result)
-def uniquecounts(row) :
+def uniquecounts(rows) :
     results={}
     for row in rows :
         # The result is the last column
@@ -59,7 +59,7 @@ def uniquecounts(row) :
 def gini_impurity(rows) :
 
     total=len(rows)
-    count=uniquecounts(rows)
+    counts=uniquecounts(rows)
     imp=0
     for k1 in counts :
         p1=float(counts[k1])/total
@@ -68,4 +68,15 @@ def gini_impurity(rows) :
             p2=float(counts[k2])/total
             imp+=p1*p2
     return imp
-            
+
+# Entropy is the sum of p(x)*log(p(x)) across all the different possible results
+
+def entropy(rows) :
+    from math import log
+    log2=lambda x : log(x)/log(2)
+    results=uniquecounts(rows)
+    ent=0.0
+    for r in results.keys() :
+        p=float(results[r])/len(rows)
+        ent=ent-p*log2(p)
+    return ent
