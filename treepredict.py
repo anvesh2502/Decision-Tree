@@ -26,18 +26,46 @@ class decisionnode :
         self.fb=fb
 
 
-    # Divides a set on a specific column.Can handle numeric or nominal values
-    def divideset(rows,columns,value) :
-        # Make a function that tells us if a row is in
-        # the first group(true) or the second group(false)
-        split_function=None
-        if isinstance(value,int) or isinstance(value,float) :
-            split_function=lambda row : row[column]>=value
-        else :
-            split_function=lambda row : row[column]==value
 
-        # Divide the rows into two sets and return them
-        set1=[row for row in rows if split_function(row)]
-        set2=[row for row in rows if not split_function(row)]
+# Divides a set on a specific column.Can handle numeric or nominal values
+def divideset(rows,column,value) :
+    # Make a function that tells us if a row is in
+    # the first group(true) or the second group(false)
+    split_function=None
+    if isinstance(value,int) or isinstance(value,float) :
+        split_function=lambda row : row[column]>=value
+    else :
+        split_function=lambda row : row[column]==value
 
-        return (set1,set2)        
+    # Divide the rows into two sets and return them
+    set1=[row for row in rows if split_function(row)]
+    set2=[row for row in rows if not split_function(row)]
+
+    return (set1,set2)
+
+
+# Create counts of possibe results (the last column of each row is the result)
+def uniquecounts(row) :
+    results={}
+    for row in rows :
+        # The result is the last column
+        r=row[len(row)-1]
+        if r not in results : results[r]=0
+        results[r]+=1
+    return results
+
+
+# Probability that the randomly placed item will be in the wrong category
+def gini_impurity(rows) :
+
+    total=len(rows)
+    count=uniquecounts(rows)
+    imp=0
+    for k1 in counts :
+        p1=float(counts[k1])/total
+        for k2 in counts :
+            if k1==k2 : continue
+            p2=float(counts[k2])/total
+            imp+=p1*p2
+    return imp
+            
