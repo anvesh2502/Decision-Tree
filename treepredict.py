@@ -178,4 +178,46 @@ def drawnode(draw,tree,x,y) :
 
     else :
         txt=' \n'.join(['%s:%d'%v for v in tree.results.items()])
-        draw.text((x-20,y),txt,(0,0,0))        
+        draw.text((x-20,y),txt,(0,0,0))
+
+
+
+def classify(observation,tree) :
+
+    if tree.results!=None :
+        return tree.results
+    else :
+        v=observation[tree.col]
+        branch=None
+        if isinstance(v,int) or isinstance(v,float) :
+            if v>=tree.value : branch=tree.tb
+            else : branch=tree.fb
+        else :
+            if v==tree.value : branch=tree.tb
+            else : branch=tree.fb
+        return classify(observation,branch)
+
+def prune(tree,mingain) :
+
+    # If the branches aren't leaves ,then prune them
+    if tree.tb.results==None :
+        prune(tree.tb,mingain)
+    if tree.fb.results==None :
+        prune(tree.fb,mingain)
+
+    # If both the subbranches are now leaves,see if they should be merged
+    if tree.tb.results!=None and tree.fb.results!=None :
+         # Build a combined dataset
+          tb,fb=[],[]
+          for v,c in tree.tb.results.items() :
+              tb+=[[v]]*c
+          for v,c in tree.fb.results.items() :
+              fb+=[[v]]*c
+
+          # Test the reduction in entropy
+          delta=entropy(tb+fb)-(entropy(tb)+entropy(fb))
+
+          if delta<mingain :
+              # Merge the branches
+              tree.tb,tree.fb=None,None
+              tree.results=uniquecounts(tb+fb)
